@@ -1,0 +1,222 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   Design tokens — light on :root, dark under .dark.
+   Values from reference design handoff and screenshots.
+   Contrast floor is WCAG AA (4.5:1).
+   --------------------------------------------------------------------------- */
+
+:root {
+  color-scheme: light;
+
+  --page: #f6f7fb;
+  --surface: #ffffff;
+  --surface-sunken: #fafbfe;
+  --surface-raised: #f1f5f9;
+  --hairline: #e4e7f0;
+  --hairline-strong: #cbd5e1;
+  --track: #eef1f6;
+
+  --ink: #0f172a;
+  --ink-muted: #334155;
+  --ink-faint: #57616f;
+  --ink-inverse: #ffffff;
+
+  --action: #4f46e5;
+  --action-ink: #4338ca;
+  --action-tint: #eef2ff;
+  --action-border: #c7d2fe;
+  --action-bar: #4f46e5;
+
+  --pass: #15803d;
+  --pass-fill: #16a34a;
+  --pass-tint: #dcfce7;
+  --pass-border: #bbf7d0;
+
+  --warn: #854d0e;
+  --warn-fill: #d97706;
+  --warn-tint: #fef3c7;
+  --warn-border: #fde68a;
+
+  --bad: #b91c1c;
+  --bad-fill: #dc2626;
+  --bad-tint: #fef2f2;
+  --bad-border: #fecaca;
+
+  --focus-ring: rgba(79, 70, 229, .22);
+
+  /* The score band's three-stop track: below pass, mid, strong. */
+  --band-gradient: linear-gradient(90deg, #fde68a 0%, #c7d2fe 55%, #bbf7d0 100%);
+  --shimmer-gradient: linear-gradient(90deg, #eef2ff 25%, #a5b4fc 50%, #eef2ff 75%);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --page: #090d16;
+  --surface: #0f172a;
+  --surface-sunken: rgba(255, 255, 255, .025);
+  --surface-raised: rgba(255, 255, 255, .06);
+  --hairline: rgba(255, 255, 255, .09);
+  --hairline-strong: rgba(255, 255, 255, .16);
+  --track: rgba(255, 255, 255, .10);
+
+  --ink: #f1f5f9;
+  --ink-muted: rgba(255, 255, 255, .78);
+  --ink-faint: rgba(255, 255, 255, .64);
+  --ink-inverse: #0f172a;
+
+  --action: #6350e8;
+  --action-ink: #b4a8ff;
+  --action-tint: rgba(124, 108, 255, .18);
+  --action-border: rgba(124, 108, 255, .45);
+  --action-bar: #7c6cff;
+
+  --pass: #4ade80;
+  --pass-fill: #4ade80;
+  --pass-tint: rgba(74, 222, 128, .15);
+  --pass-border: rgba(74, 222, 128, .30);
+
+  --warn: #fcd34d;
+  --warn-fill: #fcd34d;
+  --warn-tint: rgba(251, 191, 36, .15);
+  --warn-border: rgba(251, 191, 36, .28);
+
+  --bad: #fca5a5;
+  --bad-fill: #f87171;
+  --bad-tint: rgba(248, 113, 113, .12);
+  --bad-border: rgba(248, 113, 113, .28);
+
+  --focus-ring: rgba(124, 108, 255, .28);
+
+  --band-gradient: linear-gradient(90deg, rgba(251,191,36,.30) 0%, rgba(124,108,255,.30) 55%, rgba(74,222,128,.30) 100%);
+  --shimmer-gradient: linear-gradient(90deg, rgba(124,108,255,.08) 25%, rgba(124,108,255,.45) 50%, rgba(124,108,255,.08) 75%);
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  background-color: var(--page);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Card aesthetics */
+.rounded-card {
+  border-radius: 12px;
+}
+
+/* Tabular numbers for clean column alignment */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.pretty {
+  text-wrap: pretty;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--hairline-strong);
+  border-radius: 5px;
+}
+
+/* Form fields */
+.field {
+  background: var(--surface);
+  border: 1px solid var(--hairline-strong);
+  color: var(--ink);
+  border-radius: 8px;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.dark .field {
+  background: rgba(0, 0, 0, .25);
+  border-color: rgba(255, 255, 255, .12);
+}
+.field::placeholder {
+  color: var(--ink-faint);
+}
+.field:focus {
+  outline: none;
+  border-color: var(--action);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 9px 15px;
+  transition: background-color .18s ease, border-color .18s ease, opacity .18s ease;
+  white-space: nowrap;
+}
+.btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.btn-primary {
+  background: var(--action);
+  color: #fff;
+}
+.btn-primary:not(:disabled):hover {
+  background: #4338ca;
+}
+.dark .btn-primary:not(:disabled):hover {
+  background: #5341d6;
+}
+
+.btn-secondary {
+  background: var(--surface);
+  border: 1px solid var(--hairline-strong);
+  color: var(--ink);
+}
+.btn-secondary:not(:disabled):hover {
+  background: var(--surface-sunken);
+}
+.dark .btn-secondary {
+  background: transparent;
+  border-color: rgba(255, 255, 255, .14);
+}
+.dark .btn-secondary:not(:disabled):hover {
+  background: rgba(255, 255, 255, .05);
+}
+
+.btn-sm {
+  padding: 8px 14px;
+  font-size: 12px;
+}
+
+/* The shimmer that marks which sheet the model is currently reading */
+.shimmer {
+  background: var(--shimmer-gradient);
+  background-size: 200% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
