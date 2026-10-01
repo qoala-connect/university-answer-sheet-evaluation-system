@@ -326,6 +326,7 @@ export default function App() {
             activeCourse={activeCourse}
             issues={issues}
             onInspectStudentScript={(stu) => setInspectingScript(stu)}
+            onSelectCourse={handleChangeCourse}
           />
         )}
 

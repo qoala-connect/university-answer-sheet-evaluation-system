@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import {
   Building2, Award, TrendingUp, CheckCircle2,
-  AlertTriangle, Eye, Search, Sliders, FileText, Sparkles, X
+  AlertTriangle, Eye, Search, Sliders, FileText, Sparkles, X, Globe2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import AnnotatedScriptInspector from '../StudentView/AnnotatedScriptInspector';
+import DeanUniversityComparison from './DeanUniversityComparison';
 import { gradePill, gradeBar } from '../../utils/grade';
 import { Toolbar, StatusPill, StatCard, CardTitle, Label, Bar, Note } from '../Common/Primitives';
 
@@ -26,9 +27,10 @@ export default function DeanDashboard({
   courses = [],
   activeCourse,
   issues = [],
-  onInspectStudentScript
+  onInspectStudentScript,
+  onSelectCourse
 }) {
-  const [deanTab, setDeanTab] = useState('ledger'); // 'ledger' | 'obe' | 'grievances' | 'faculty_audit'
+  const [deanTab, setDeanTab] = useState('benchmarks'); // 'benchmarks' | 'ledger' | 'obe' | 'grievances' | 'faculty_audit'
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedModeFilter, setSelectedModeFilter] = useState('all'); // 'all' | 'Assignment' | 'Quiz' | 'Examination'
   const [inspectingStudent, setInspectingStudent] = useState(null);
@@ -88,6 +90,7 @@ export default function DeanDashboard({
   };
 
   const deanTabs = [
+    { id: 'benchmarks', label: 'Inter-University Benchmarks', icon: Globe2 },
     { id: 'ledger', label: 'Scripts ledger', icon: FileText, count: totalEvaluated },
     { id: 'obe', label: 'OBE attainment', icon: TrendingUp },
     { id: 'grievances', label: 'Petitions', icon: AlertTriangle, count: issues.length },
@@ -192,6 +195,15 @@ export default function DeanDashboard({
             );
           })}
         </div>
+ 
+        {/* Tab 0: Inter-University Regional & National Benchmarks (Dean Exclusive) */}
+        {deanTab === 'benchmarks' && (
+          <DeanUniversityComparison
+            activeCourse={activeCourse}
+            courses={courses}
+            onSelectCourse={onSelectCourse}
+          />
+        )}
 
         {/* Tab 1: Comprehensive Script Inspection Ledger */}
         {deanTab === 'ledger' && (

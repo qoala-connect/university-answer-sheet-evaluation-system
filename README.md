@@ -13,12 +13,21 @@ An institutional AI-powered web platform designed for automated, fair, and trans
 - **Curricular Rubric & Ordinance Configurator**: Fine-tune LaTeX math verification strictness, diagram credit weightage, step-marking credit, and moderation variance tolerance (±5%).
 - **Re-Evaluation & Grievance Desk**: Adjudicate formal candidate challenge evaluation petitions with dual-evaluator moderation deltas, AI recommendations, and live score adjustment updating the institutional ledger.
 
-### 🏛️ 2. Controller of Examinations (CoE) Executive Perspective
+### 🏛️ 2. Office of the Dean Executive Perspective (Dean-Exclusive)
+- **Inter-University Regional & National Benchmark Analytics**: Compare quantitative examination results across regional state boards and premier national universities (e.g., IIT Madras, NIT Surathkal, BITS Pilani, Anna University, VTU) across all courses.
+- **Quantitative Cohort Comparative Metrics**:
+  - **Pass / Fail Ratios**: Side-by-side percentage pass and fail rates with exact student headcounts.
+  - **Overall Batch Performance**: Batch mean percentage, median marks, standard deviation (σ), and distinction rates (>= 75%).
+  - **Academic Rigour & Quality Indicators**: Outcome-Based Education (OBE) Course Outcome attainment targets, Bloom's Taxonomy L4/L5 analytical proof attainment index, derivation accuracy index, and formal candidate appeal rates.
+  - **Interactive Head-to-Head Delta Audit**: Direct paired benchmarking between host institution and any chosen peer university.
+- **Departmental Quality Ratification & Accreditation Seal**: Formal dean review, endorsement notes, and digital ratification confetti sign-off.
+
+### 🏛️ 3. Controller of Examinations (CoE) Executive Perspective
 - **Institutional Moderation Console**: Monitor dual-evaluator score variance, inspect borderline pass/fail candidates, and review regulatory audit compliance.
 - **Academic Moderation Curve Adjuster**: Apply institutional grace moderation offsets under University Ordinance Section 12(b).
 - **Official Ledger Certification & Seal**: Formal digital certification and result publishing with confetti validation.
 
-### 🧑‍🎓 3. University Scholar / Student Perspective
+### 🧑‍🎓 4. University Scholar / Student Perspective
 - **Annotated Booklet Script Inspector**: Inspect scanned handwritten answer scripts with inline AI optical verification tags, step-marking credit justifications, and deduction breakdowns.
 - **Academic Performance & OBE Proficiency Hub**: View personal Course Outcome mastery vs cohort averages and minimum ABET targets.
 - **Formal Challenge Evaluation Petition Desk**: Submit official re-assessment appeals citing specific mathematical step lines, docket generation, and institutional fee confirmation tracking.
