@@ -9,7 +9,8 @@ export default function Login({ students = [], onSignIn, theme, onToggleTheme })
   const [role, setRole] = useState(null); // null | 'teacher' | 'student' | 'dean' | 'coe'
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.id || '');
+  const defaultUnivStudent = students.find(s => s.courseId === 'me_617' || s.courseId === 'math_202') || students[0];
+  const [selectedStudentId, setSelectedStudentId] = useState(defaultUnivStudent?.id || '');
   const [error, setError] = useState('');
 
   const handleRoleSelect = (selectedRole) => {
@@ -25,7 +26,8 @@ export default function Login({ students = [], onSignIn, theme, onToggleTheme })
       setUsername(COE_CREDENTIALS.username);
       setPassword(COE_CREDENTIALS.password);
     } else if (selectedRole === 'student') {
-      setSelectedStudentId(students[0]?.id || '');
+      const preferred = students.find(s => s.courseId === 'me_617' || s.courseId === 'math_202') || students[0];
+      setSelectedStudentId(preferred?.id || '');
     }
   };
 
@@ -60,7 +62,7 @@ export default function Login({ students = [], onSignIn, theme, onToggleTheme })
 
   const handleQuickDemoSignIn = (roleKey, customStudent = null) => {
     if (roleKey === 'student') {
-      const target = customStudent || students[0];
+      const target = customStudent || students.find(s => s.courseId === 'me_617' || s.courseId === 'math_202') || students[0];
       const session = signInAsRole('student', { student: target });
       onSignIn(session);
     } else {

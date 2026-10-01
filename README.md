@@ -14,12 +14,16 @@ An institutional AI-powered web platform designed for automated, fair, and trans
 - **Re-Evaluation & Grievance Desk**: Adjudicate formal candidate challenge evaluation petitions with dual-evaluator moderation deltas, AI recommendations, and live score adjustment updating the institutional ledger.
 
 ### 🏛️ 2. Office of the Dean Executive Perspective (Dean-Exclusive)
-- **Inter-University Regional & National Benchmark Analytics**: Compare quantitative examination results across regional state boards and premier national universities (e.g., IIT Madras, NIT Surathkal, BITS Pilani, Anna University, VTU) across all courses.
+- **National Universities Result Comparison Console**: Compare institutional examination results with top-tier national universities (e.g., IIT Madras, IISc Bangalore, University of Delhi, IIM Ahmedabad, NLSIU Bangalore, NIT Surathkal, BITS Pilani) across both technical and non-technical courses.
+- **Qualitative Pedagogical Evaluation Audit**:
+  - **Qualitative Academic Verdicts**: High-level assessments of candidate conceptual depth, proof formulation, and critical thinking.
+  - **Conceptual Strengths & Critical Curricular Gaps**: Systematic identification of what candidates mastered vs common deduction patterns in student scripts.
+  - **Dean's Action Items & Recommendations**: Actionable pedagogical adjustments (e.g. lab simulations, tutorial reform, case analysis).
 - **Quantitative Cohort Comparative Metrics**:
   - **Pass / Fail Ratios**: Side-by-side percentage pass and fail rates with exact student headcounts.
   - **Overall Batch Performance**: Batch mean percentage, median marks, standard deviation (σ), and distinction rates (>= 75%).
   - **Academic Rigour & Quality Indicators**: Outcome-Based Education (OBE) Course Outcome attainment targets, Bloom's Taxonomy L4/L5 analytical proof attainment index, derivation accuracy index, and formal candidate appeal rates.
-  - **Interactive Head-to-Head Delta Audit**: Direct paired benchmarking between host institution and any chosen peer university.
+  - **Interactive Head-to-Head Paired Audit**: Direct paired benchmarking between host institution and any chosen peer university.
 - **Departmental Quality Ratification & Accreditation Seal**: Formal dean review, endorsement notes, and digital ratification confetti sign-off.
 
 ### 🏛️ 3. Controller of Examinations (CoE) Executive Perspective

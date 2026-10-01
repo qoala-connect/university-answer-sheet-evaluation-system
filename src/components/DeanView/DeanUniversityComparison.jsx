@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import {
   Globe2, Building, TrendingUp, Award, BarChart3,
   SlidersHorizontal, CheckCircle2, ChevronRight,
-  Sparkles, Layers, Landmark
+  Sparkles, Layers, Landmark, BookOpen, AlertCircle,
+  FileCheck, HelpCircle, ShieldCheck
 } from 'lucide-react';
 import {
   BENCHMARK_UNIVERSITIES,
@@ -15,9 +16,10 @@ export default function DeanUniversityComparison({
   courses = [],
   onSelectCourse
 }) {
-  const [scopeFilter, setScopeFilter] = useState('all'); // 'all' | 'regional' | 'national'
+  const [scopeFilter, setScopeFilter] = useState('national'); // 'all' | 'national' | 'regional'
   const [selectedMetric, setSelectedMetric] = useState('passPercentage'); // 'passPercentage' | 'batchAveragePercentage' | 'obeTargetAttainment' | 'bloomRigourIndex' | 'distinctionRate'
   const [pinnedCompareUnivId, setPinnedCompareUnivId] = useState('iit_m');
+  const [viewPerspective, setViewPerspective] = useState('both'); // 'both' | 'qualitative' | 'quantitative'
 
   const activeCourseId = activeCourse?.id || 'me_617';
 
@@ -36,7 +38,7 @@ export default function DeanUniversityComparison({
         shortName: stat.univId,
         tier: 'Peer University',
         nirfRank: '-',
-        region: 'State',
+        region: 'National',
         accreditation: 'Accredited'
       };
       return {
@@ -59,45 +61,47 @@ export default function DeanUniversityComparison({
 
   // Pinned comparison peer
   const pinnedPeer = useMemo(() => {
-    return institutions.find((inst) => inst.univId === pinnedCompareUnivId) || institutions[1];
+    return institutions.find((inst) => inst.univId === pinnedCompareUnivId) || institutions.find(i => !i.isHost) || institutions[1];
   }, [institutions, pinnedCompareUnivId]);
 
-  // Calculate cohort aggregates (Regional vs National)
+  // Calculate cohort aggregates (National Peer Universities vs Host)
   const cohortAggregates = useMemo(() => {
-    const regional = institutions.filter((i) => i.scope === 'regional');
     const national = institutions.filter((i) => i.scope === 'national');
+    const regional = institutions.filter((i) => i.scope === 'regional');
 
     const calcAvg = (arr, key) => arr.length ? (arr.reduce((s, x) => s + (x[key] || 0), 0) / arr.length).toFixed(1) : 0;
 
     return {
+      national: {
+        passPercentage: calcAvg(national, 'passPercentage'),
+        failPercentage: calcAvg(national, 'failPercentage'),
+        batchAveragePercentage: calcAvg(national, 'batchAveragePercentage'),
+        obeAttainment: calcAvg(national, 'obeTargetAttainment'),
+        bloomRigourIndex: calcAvg(national, 'bloomRigourIndex'),
+        totalAppeared: national.reduce((s, x) => s + (x.appearedCount || 0), 0),
+        count: national.length
+      },
       regional: {
         passPercentage: calcAvg(regional, 'passPercentage'),
         failPercentage: calcAvg(regional, 'failPercentage'),
         batchAveragePercentage: calcAvg(regional, 'batchAveragePercentage'),
         obeAttainment: calcAvg(regional, 'obeTargetAttainment'),
         totalAppeared: regional.reduce((s, x) => s + (x.appearedCount || 0), 0)
-      },
-      national: {
-        passPercentage: calcAvg(national, 'passPercentage'),
-        failPercentage: calcAvg(national, 'failPercentage'),
-        batchAveragePercentage: calcAvg(national, 'batchAveragePercentage'),
-        obeAttainment: calcAvg(national, 'obeTargetAttainment'),
-        totalAppeared: national.reduce((s, x) => s + (x.appearedCount || 0), 0)
       }
     };
   }, [institutions]);
 
   const metricsConfig = [
-    { id: 'passPercentage', label: 'Pass Rate (%)', unit: '%', desc: 'Candidates meeting min pass cutoff' },
+    { id: 'passPercentage', label: 'Pass Rate (%)', unit: '%', desc: 'Candidates meeting statutory pass cutoff' },
     { id: 'batchAveragePercentage', label: 'Batch Avg Score (%)', unit: '%', desc: 'Overall mean cohort performance' },
-    { id: 'obeTargetAttainment', label: 'OBE CO Attainment (%)', unit: '%', desc: 'NBA / ABET Course Outcomes met' },
+    { id: 'obeTargetAttainment', label: 'OBE CO Attainment (%)', unit: '%', desc: 'Course outcomes met (NBA/ABET)' },
     { id: 'bloomRigourIndex', label: 'Bloom L4/L5 Rigour', unit: '%', desc: 'Analytical proof & synthesis score' },
     { id: 'distinctionRate', label: 'Distinction Rate (>75%)', unit: '%', desc: 'Candidates securing >= 75%' }
   ];
 
   return (
     <div className="space-y-4">
-      {/* Executive Header & Scope Selector */}
+      {/* Executive Header & Course Switcher */}
       <div className="rounded-card border border-hairline bg-surface p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -105,10 +109,13 @@ export default function DeanUniversityComparison({
               <span className="flex h-7 w-7 items-center justify-center rounded-tile bg-action-tint text-action-ink">
                 <Globe2 className="h-4 w-4" />
               </span>
-              <CardTitle>Regional &amp; National University Benchmark Analytics</CardTitle>
+              <CardTitle>Dean's National University Results Comparison Console</CardTitle>
+              <span className="rounded-pill bg-action-tint border border-action-border px-2 py-0.5 font-mono text-[10px] font-bold text-action-ink uppercase">
+                Dean-Exclusive
+              </span>
             </div>
             <p className="mt-1 text-body-sm font-medium text-ink-muted">
-              Executive comparison of institutional pass/fail ratios, batch score distributions, OBE course outcome mastery, and evaluation rigor across accredited higher education peers for <strong className="text-ink">{courseBenchmark.courseName}</strong>.
+              Qualitative and quantitative benchmark of host university candidate scripts against top-tier <strong>National Universities</strong> across all collegiate technical and non-technical disciplines for <strong className="text-ink">{courseBenchmark.courseName}</strong>.
             </p>
           </div>
 
@@ -116,12 +123,13 @@ export default function DeanUniversityComparison({
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex items-center gap-1.5 rounded-field border border-hairline bg-page px-3 py-1.5 text-[11.5px] font-medium text-ink-faint">
               <Layers className="h-3.5 w-3.5 text-action-ink" />
-              <span>Course Type:</span>
-              <strong className="text-ink">{courseBenchmark.courseType}</strong>
+              <span>Discipline:</span>
+              <strong className="text-ink">{courseBenchmark.discipline || courseBenchmark.courseType}</strong>
             </div>
 
             {onSelectCourse && courses.length > 0 && (
               <select
+                aria-label="Select course to benchmark"
                 value={activeCourseId}
                 onChange={(e) => onSelectCourse(e.target.value)}
                 className="field text-[12px] font-semibold py-1.5 px-3"
@@ -136,32 +144,57 @@ export default function DeanUniversityComparison({
           </div>
         </div>
 
-        {/* Filters and Metric Selector Bar */}
+        {/* Filters, View Perspective & Metric Selector Bar */}
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-hairline pt-4">
-          <div className="flex items-center gap-1 rounded-field border border-hairline bg-page p-1">
-            <span className="px-2 font-mono text-[10px] font-bold text-ink-faint uppercase">Scope:</span>
-            {[
-              { id: 'all', label: 'All Peers (Regional & National)' },
-              { id: 'regional', label: 'Regional Universities' },
-              { id: 'national', label: 'National Premier Tier' }
-            ].map((scope) => (
-              <button
-                key={scope.id}
-                onClick={() => setScopeFilter(scope.id)}
-                className={`rounded-pill px-3 py-1 text-[11.5px] font-medium transition-colors cursor-pointer ${
-                  scopeFilter === scope.id
-                    ? 'bg-action font-semibold text-white'
-                    : 'text-ink-faint hover:text-ink'
-                }`}
-              >
-                {scope.label}
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* National vs All Filter */}
+            <div className="flex items-center gap-1 rounded-field border border-hairline bg-page p-1">
+              <span className="px-2 font-mono text-[10px] font-bold text-ink-faint uppercase">Scope:</span>
+              {[
+                { id: 'national', label: 'National Universities Only' },
+                { id: 'all', label: 'All Peers (National & Regional)' }
+              ].map((scope) => (
+                <button
+                  key={scope.id}
+                  onClick={() => setScopeFilter(scope.id)}
+                  className={`rounded-pill px-3 py-1 text-[11.5px] font-medium transition-colors cursor-pointer ${
+                    scopeFilter === scope.id
+                      ? 'bg-action font-semibold text-white'
+                      : 'text-ink-faint hover:text-ink'
+                  }`}
+                >
+                  {scope.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Qualitative vs Quantitative Perspective View */}
+            <div className="flex items-center gap-1 rounded-field border border-hairline bg-page p-1">
+              <span className="px-2 font-mono text-[10px] font-bold text-ink-faint uppercase">Perspective:</span>
+              {[
+                { id: 'both', label: 'Combined View' },
+                { id: 'qualitative', label: 'Qualitative Evaluation' },
+                { id: 'quantitative', label: 'Quantitative Metrics' }
+              ].map((view) => (
+                <button
+                  key={view.id}
+                  onClick={() => setViewPerspective(view.id)}
+                  className={`rounded-pill px-2.5 py-1 text-[11px] font-medium transition-colors cursor-pointer ${
+                    viewPerspective === view.id
+                      ? 'bg-surface-raised font-bold text-ink shadow-sm'
+                      : 'text-ink-faint hover:text-ink'
+                  }`}
+                >
+                  {view.label}
+                </button>
+              ))}
+            </div>
           </div>
 
+          {/* Metric Selector */}
           <div className="flex items-center gap-1.5">
             <SlidersHorizontal className="h-3.5 w-3.5 text-ink-faint" />
-            <span className="font-mono text-[10.5px] font-semibold text-ink-faint uppercase">Compare Metric:</span>
+            <span className="font-mono text-[10.5px] font-semibold text-ink-faint uppercase">Metric:</span>
             <div className="flex items-center gap-1 overflow-x-auto rounded-field border border-hairline bg-page p-1">
               {metricsConfig.map((metric) => (
                 <button
@@ -181,13 +214,13 @@ export default function DeanUniversityComparison({
         </div>
       </div>
 
-      {/* High-Level Comparative KPI Snapshot (Host vs Regional vs National) */}
+      {/* KPI Metric Summary Strip (Host vs National Premier Peers) */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {/* Host Institution Card */}
         <div className="rounded-card border-2 border-action-border bg-action-tint/30 p-4 relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="rounded-pill bg-action px-2 py-0.5 font-mono text-[10px] font-bold text-white uppercase tracking-wider">
-              Host University
+              Host University (Our Results)
             </span>
             <span className="font-mono text-[11px] font-semibold text-action-ink">NIRF #{hostStats.nirfRank}</span>
           </div>
@@ -195,13 +228,13 @@ export default function DeanUniversityComparison({
           <div className="mt-3 grid grid-cols-2 gap-2 border-t border-action-border/40 pt-2.5">
             <div>
               <div className="font-mono text-[10px] text-ink-faint uppercase">Pass Rate</div>
-              <div className="text-[17px] font-black text-pass">{hostStats.passPercentage}%</div>
-              <div className="font-mono text-[10px] text-fail">Fail: {hostStats.failPercentage}%</div>
+              <div className="text-[18px] font-black text-pass">{hostStats.passPercentage}%</div>
+              <div className="font-mono text-[10px] text-fail">Fail: {hostStats.failPercentage}% ({hostStats.failedCount} students)</div>
             </div>
             <div>
               <div className="font-mono text-[10px] text-ink-faint uppercase">Batch Mean</div>
-              <div className="text-[17px] font-black text-action-ink">{hostStats.batchAveragePercentage}%</div>
-              <div className="font-mono text-[10px] text-ink-muted">Avg: {hostStats.batchAverageMarks}/{courseBenchmark.maxMarks}</div>
+              <div className="text-[18px] font-black text-action-ink">{hostStats.batchAveragePercentage}%</div>
+              <div className="font-mono text-[10px] text-ink-muted">Avg: {hostStats.batchAverageMarks}/{courseBenchmark.maxMarks} (σ={hostStats.standardDeviation})</div>
             </div>
           </div>
           <div className="mt-2.5 flex items-center justify-between text-[11px] text-ink-muted">
@@ -210,178 +243,287 @@ export default function DeanUniversityComparison({
           </div>
         </div>
 
-        {/* Regional Universities Average Card */}
+        {/* National Peer Universities Average Card */}
         <div className="rounded-card border border-hairline bg-surface p-4">
           <div className="flex items-center justify-between">
             <span className="rounded-pill bg-surface-sunken border border-hairline px-2 py-0.5 font-mono text-[10px] font-bold text-ink-faint uppercase">
-              Regional Univs Avg
+              National Universities Mean
             </span>
-            <span className="text-[11px] text-ink-faint">n = {cohortAggregates.regional.totalAppeared} candidates</span>
+            <span className="text-[11px] text-ink-faint">{cohortAggregates.national.count} National Peers</span>
           </div>
-          <div className="mt-2 text-[14px] font-bold text-ink">State Affiliated &amp; Regional Peers</div>
+          <div className="mt-2 text-[14px] font-bold text-ink">National Benchmark Average</div>
           <div className="mt-3 grid grid-cols-2 gap-2 border-t border-hairline pt-2.5">
             <div>
               <div className="font-mono text-[10px] text-ink-faint uppercase">Pass Rate</div>
-              <div className="text-[17px] font-black text-ink">{cohortAggregates.regional.passPercentage}%</div>
-              <div className="font-mono text-[10px] text-fail">Fail: {cohortAggregates.regional.failPercentage}%</div>
-            </div>
-            <div>
-              <div className="font-mono text-[10px] text-ink-faint uppercase">Batch Mean</div>
-              <div className="text-[17px] font-black text-ink">{cohortAggregates.regional.batchAveragePercentage}%</div>
-              <div className="font-mono text-[10px] text-ink-faint">
-                {hostStats.batchAveragePercentage > cohortAggregates.regional.batchAveragePercentage ? (
-                  <span className="text-pass">+{((hostStats.batchAveragePercentage - cohortAggregates.regional.batchAveragePercentage)).toFixed(1)}% vs Host</span>
-                ) : null}
-              </div>
-            </div>
-          </div>
-          <div className="mt-2.5 flex items-center justify-between text-[11px] text-ink-muted">
-            <span>Regional OBE Attainment:</span>
-            <strong className="text-ink">{cohortAggregates.regional.obeAttainment}%</strong>
-          </div>
-        </div>
-
-        {/* National Benchmark Card */}
-        <div className="rounded-card border border-hairline bg-surface p-4">
-          <div className="flex items-center justify-between">
-            <span className="rounded-pill bg-surface-sunken border border-hairline px-2 py-0.5 font-mono text-[10px] font-bold text-ink-faint uppercase">
-              National Premier Tier
-            </span>
-            <span className="text-[11px] text-ink-faint">IITs / NITs / BITS</span>
-          </div>
-          <div className="mt-2 text-[14px] font-bold text-ink">National Institutes of Eminence</div>
-          <div className="mt-3 grid grid-cols-2 gap-2 border-t border-hairline pt-2.5">
-            <div>
-              <div className="font-mono text-[10px] text-ink-faint uppercase">Pass Rate</div>
-              <div className="text-[17px] font-black text-pass">{cohortAggregates.national.passPercentage}%</div>
+              <div className="text-[18px] font-black text-pass">{cohortAggregates.national.passPercentage}%</div>
               <div className="font-mono text-[10px] text-fail">Fail: {cohortAggregates.national.failPercentage}%</div>
             </div>
             <div>
               <div className="font-mono text-[10px] text-ink-faint uppercase">Batch Mean</div>
-              <div className="text-[17px] font-black text-ink">{cohortAggregates.national.batchAveragePercentage}%</div>
-              <div className="font-mono text-[10px] text-ink-muted">Variance: {(hostStats.batchAveragePercentage - cohortAggregates.national.batchAveragePercentage).toFixed(1)}%</div>
+              <div className="text-[18px] font-black text-ink">{cohortAggregates.national.batchAveragePercentage}%</div>
+              <div className="font-mono text-[10px] text-ink-muted">
+                Host vs National: {(hostStats.batchAveragePercentage - cohortAggregates.national.batchAveragePercentage) >= 0 ? '+' : ''}{(hostStats.batchAveragePercentage - cohortAggregates.national.batchAveragePercentage).toFixed(1)}%
+              </div>
             </div>
           </div>
           <div className="mt-2.5 flex items-center justify-between text-[11px] text-ink-muted">
-            <span>National OBE Attainment:</span>
+            <span>National OBE Target:</span>
             <strong className="text-ink">{cohortAggregates.national.obeAttainment}%</strong>
           </div>
         </div>
 
-        {/* Dean's Quality Competitive Verdict Card */}
+        {/* Academic Quality & Rigour Card */}
+        <div className="rounded-card border border-hairline bg-surface p-4">
+          <div className="flex items-center justify-between">
+            <span className="rounded-pill bg-surface-sunken border border-hairline px-2 py-0.5 font-mono text-[10px] font-bold text-ink-faint uppercase">
+              Evaluator Rigour
+            </span>
+            <span className="font-mono text-[11px] text-pass font-semibold">Gemini 3.6 Multimodal</span>
+          </div>
+          <div className="mt-2 text-[14px] font-bold text-ink">Analytical Bloom L4/L5 Rigor</div>
+          <div className="mt-3 grid grid-cols-2 gap-2 border-t border-hairline pt-2.5">
+            <div>
+              <div className="font-mono text-[10px] text-ink-faint uppercase">Bloom Rigor</div>
+              <div className="text-[18px] font-black text-ink">{hostStats.bloomRigourIndex}%</div>
+              <div className="font-mono text-[10px] text-ink-muted">National: {cohortAggregates.national.bloomRigourIndex}%</div>
+            </div>
+            <div>
+              <div className="font-mono text-[10px] text-ink-faint uppercase">Distinction</div>
+              <div className="text-[18px] font-black text-action-ink">{hostStats.distinctionRate}%</div>
+              <div className="font-mono text-[10px] text-pass">&gt;= 75% Score</div>
+            </div>
+          </div>
+          <div className="mt-2.5 flex items-center justify-between text-[11px] text-ink-muted">
+            <span>Appeal Rate:</span>
+            <strong className="text-ink">{hostStats.appealRate}% (Low Docket Volume)</strong>
+          </div>
+        </div>
+
+        {/* Dean's Institutional Standing Verdict Card */}
         <div className="rounded-card border border-hairline bg-surface p-4 flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-1.5 text-action-ink">
               <Award className="h-4 w-4" />
               <span className="font-mono text-[10px] font-bold uppercase tracking-wider">Dean Audit Standing</span>
             </div>
-            <div className="mt-2 text-[16px] font-black text-ink">Tier-1 Academic Parity</div>
+            <div className="mt-2 text-[16px] font-black text-ink">National Parity Confirmed</div>
             <p className="mt-1 text-[11px] leading-[1.45] text-ink-muted">
-              Our candidates outperform regional state universities by <strong className="text-pass">+{((hostStats.passPercentage - cohortAggregates.regional.passPercentage)).toFixed(1)}%</strong> in pass rates and perform within <strong className="text-ink">1.8%</strong> of national premier benchmarks.
+              Candidate performance on <strong className="text-ink">{courseBenchmark.courseName}</strong> matches top national universities with a <strong className="text-pass">{hostStats.passPercentage}% pass rate</strong> and robust accreditation outcome alignment.
             </p>
           </div>
           <div className="mt-3 rounded-inner bg-pass-tint/50 border border-pass-border px-2.5 py-1 text-[10.5px] font-semibold text-pass flex items-center gap-1">
-            <CheckCircle2 className="h-3 w-3 shrink-0" /> ABET &amp; NBA Competitive Baseline Satisfied
+            <CheckCircle2 className="h-3 w-3 shrink-0" /> NBA &amp; National Regulatory Baseline Satisfied
           </div>
         </div>
       </div>
 
-      {/* Visual Comparative Graph / Distribution Comparison */}
-      <div className="rounded-card border border-hairline bg-surface p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline pb-3">
-          <div className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-action" />
-            <CardTitle>Quantitative Cross-Institutional Performance Distribution ({metricsConfig.find(m => m.id === selectedMetric)?.label})</CardTitle>
+      {/* QUALITATIVE EVALUATION AUDIT CARDS (When perspective includes qualitative) */}
+      {(viewPerspective === 'both' || viewPerspective === 'qualitative') && (
+        <div className="rounded-card border border-hairline bg-surface p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline pb-3">
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-action" />
+              <CardTitle>Dean's Qualitative Results Audit &amp; Conceptual Pedagogy Comparison</CardTitle>
+            </div>
+            <span className="text-[11.5px] font-medium text-ink-faint">
+              Pedagogical verdicts, conceptual strengths, critical curricular gaps &amp; evaluator rigor
+            </span>
           </div>
-          <span className="text-[11px] text-ink-faint">
-            Values calibrated to standardized university grading rubric
-          </span>
-        </div>
 
-        <div className="mt-4 space-y-4">
-          {filteredInstitutions.map((inst, idx) => {
-            const metricVal = inst[selectedMetric] || 0;
-            const isHost = inst.isHost;
-            return (
-              <div
-                key={inst.univId}
-                className={`rounded-inner border p-3 transition-colors ${
-                  isHost
-                    ? 'border-action-border bg-action-tint/20 ring-1 ring-action-border/50'
-                    : 'border-hairline bg-surface-sunken hover:border-ink-faint/30'
-                }`}
-              >
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-2 min-w-[280px]">
-                    <span className="font-mono text-[11px] font-bold text-ink-faint w-5">#{idx + 1}</span>
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {filteredInstitutions.map((inst) => {
+              const isHost = inst.isHost;
+              return (
+                <div
+                  key={inst.univId}
+                  className={`rounded-card border p-4.5 transition-colors ${
+                    isHost
+                      ? 'border-action-border bg-action-tint/20 ring-1 ring-action-border/60'
+                      : 'border-hairline bg-surface-sunken hover:border-hairline-strong'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2 border-b border-hairline/60 pb-3">
                     <div>
                       <div className="flex items-center gap-2">
-                        <strong className={`text-[13px] ${isHost ? 'text-action-ink font-bold' : 'text-ink'}`}>
+                        <strong className={`text-[14px] ${isHost ? 'text-action-ink font-bold' : 'text-ink'}`}>
                           {inst.name}
                         </strong>
                         {isHost && (
-                          <span className="rounded-[4px] bg-action px-1.5 py-0.2 font-mono text-[9px] font-bold text-white uppercase">
-                            Host
+                          <span className="rounded-[4px] bg-action px-2 py-0.5 font-mono text-[9px] font-bold text-white uppercase">
+                            Host Institution
                           </span>
                         )}
-                        <span className={`rounded-pill border px-2 py-0.5 text-[9.5px] font-bold ${
-                          inst.scope === 'national'
-                            ? 'bg-action-tint border-action-border text-action-ink'
-                            : 'bg-surface border-hairline text-ink-faint'
-                        }`}>
-                          {inst.tier}
-                        </span>
                       </div>
-                      <div className="mt-0.5 flex items-center gap-3 text-[10.5px] text-ink-faint">
+                      <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-[10.5px] text-ink-faint">
                         <span>NIRF: #{inst.nirfRank}</span>
                         <span>•</span>
-                        <span>Appeared: {inst.appearedCount} students</span>
+                        <span>{inst.category || inst.tier}</span>
                         <span>•</span>
-                        <span className="text-pass font-medium">Passed: {inst.passedCount} ({inst.passPercentage}%)</span>
+                        <span className="text-pass font-bold">Pass: {inst.passPercentage}%</span>
                         <span>•</span>
-                        <span className="text-fail font-medium">Failed: {inst.failedCount} ({inst.failPercentage}%)</span>
+                        <span className="text-fail font-bold">Fail: {inst.failPercentage}%</span>
                       </div>
                     </div>
+
+                    <span className={`shrink-0 rounded-pill px-2.5 py-0.5 text-[10px] font-bold ${
+                      inst.scope === 'national' || isHost
+                        ? 'bg-pass-tint border border-pass-border text-pass'
+                        : 'bg-surface border border-hairline text-ink-faint'
+                    }`}>
+                      {inst.auditStatus}
+                    </span>
                   </div>
 
-                  <div className="flex items-center gap-4 sm:min-w-[260px]">
-                    <div className="w-full">
-                      <div className="flex items-center justify-between text-[11.5px] font-semibold mb-1">
-                        <span className="font-mono text-[10.5px] text-ink-faint">
-                          {metricsConfig.find(m => m.id === selectedMetric)?.label}
-                        </span>
-                        <span className="font-mono text-[13px] font-bold text-ink">
-                          {metricVal}%
-                        </span>
+                  {/* Qualitative Breakdown Blocks */}
+                  <div className="mt-3.5 space-y-3 text-[12px]">
+                    {/* Overall Qualitative Verdict */}
+                    <div>
+                      <div className="font-mono text-[10px] font-bold uppercase tracking-wider text-action-ink flex items-center gap-1">
+                        <Sparkles className="h-3 w-3" /> Qualitative Academic Verdict
                       </div>
-                      <Bar
-                        percent={metricVal}
-                        color={isHost ? 'var(--action)' : metricVal >= 80 ? 'var(--pass)' : metricVal >= 65 ? 'var(--warn)' : 'var(--fail)'}
-                        height={8}
-                        delay={idx * 50}
-                      />
+                      <p className="mt-1 font-semibold text-ink leading-[1.45]">
+                        "{inst.qualitativeVerdict}"
+                      </p>
+                    </div>
+
+                    {/* Conceptual Strengths */}
+                    <div className="rounded-inner bg-surface p-2.5 border border-hairline/70">
+                      <div className="font-mono text-[9.5px] font-bold uppercase tracking-wider text-pass flex items-center gap-1">
+                        <CheckCircle2 className="h-3 w-3" /> Conceptual Strengths in Student Scripts
+                      </div>
+                      <p className="mt-1 text-ink-muted text-[11.5px] leading-[1.5]">
+                        {inst.conceptualStrengths}
+                      </p>
+                    </div>
+
+                    {/* Critical Gaps & Deductions */}
+                    <div className="rounded-inner bg-surface p-2.5 border border-hairline/70">
+                      <div className="font-mono text-[9.5px] font-bold uppercase tracking-wider text-warn flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" /> Curricular Gaps &amp; Common Mark Deductions
+                      </div>
+                      <p className="mt-1 text-ink-muted text-[11.5px] leading-[1.5]">
+                        {inst.criticalGaps}
+                      </p>
+                    </div>
+
+                    {/* Pedagogical Recommendation */}
+                    <div className="border-t border-hairline/60 pt-2 flex items-start gap-1.5 text-[11px] text-ink-faint">
+                      <FileCheck className="h-3.5 w-3.5 text-action-ink shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="text-ink">Dean's Action Item:</strong> {inst.pedagogicalRecommendation}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Comprehensive Multi-Parameter Quantitative Audit Table */}
+      {/* QUANTITATIVE GRAPH & DISTRIBUTION (When perspective includes quantitative) */}
+      {(viewPerspective === 'both' || viewPerspective === 'quantitative') && (
+        <div className="rounded-card border border-hairline bg-surface p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline pb-3">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-action" />
+              <CardTitle>
+                Cross-Institutional Comparative Distribution — {metricsConfig.find(m => m.id === selectedMetric)?.label}
+              </CardTitle>
+            </div>
+            <span className="text-[11px] text-ink-faint">
+              Standardized university grading &amp; multimodal rubrics
+            </span>
+          </div>
+
+          <div className="mt-4 space-y-3.5">
+            {filteredInstitutions.map((inst, idx) => {
+              const metricVal = inst[selectedMetric] || 0;
+              const isHost = inst.isHost;
+              return (
+                <div
+                  key={inst.univId}
+                  className={`rounded-inner border p-3.5 transition-colors ${
+                    isHost
+                      ? 'border-action-border bg-action-tint/20 ring-1 ring-action-border/50'
+                      : 'border-hairline bg-surface-sunken hover:border-ink-faint/30'
+                  }`}
+                >
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-2.5 min-w-[300px]">
+                      <span className="font-mono text-[11px] font-bold text-ink-faint w-5">#{idx + 1}</span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <strong className={`text-[13px] ${isHost ? 'text-action-ink font-bold' : 'text-ink'}`}>
+                            {inst.name}
+                          </strong>
+                          {isHost && (
+                            <span className="rounded-[4px] bg-action px-1.5 py-0.2 font-mono text-[9px] font-bold text-white uppercase">
+                              Host
+                            </span>
+                          )}
+                          <span className={`rounded-pill border px-2 py-0.5 text-[9.5px] font-bold ${
+                            inst.scope === 'national'
+                              ? 'bg-action-tint border-action-border text-action-ink'
+                              : 'bg-surface border-hairline text-ink-faint'
+                          }`}>
+                            {inst.tier}
+                          </span>
+                        </div>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-3 text-[10.5px] text-ink-faint">
+                          <span>NIRF: #{inst.nirfRank}</span>
+                          <span>•</span>
+                          <span>Candidates: {inst.appearedCount}</span>
+                          <span>•</span>
+                          <span className="text-pass font-semibold">Passed: {inst.passedCount} ({inst.passPercentage}%)</span>
+                          <span>•</span>
+                          <span className="text-fail font-semibold">Failed: {inst.failedCount} ({inst.failPercentage}%)</span>
+                          <span>•</span>
+                          <span>Batch Mean: {inst.batchAverageMarks}/{courseBenchmark.maxMarks}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 sm:min-w-[280px]">
+                      <div className="w-full">
+                        <div className="flex items-center justify-between text-[11.5px] font-semibold mb-1">
+                          <span className="font-mono text-[10.5px] text-ink-faint">
+                            {metricsConfig.find(m => m.id === selectedMetric)?.label}
+                          </span>
+                          <span className="font-mono text-[13px] font-bold text-ink">
+                            {metricVal}%
+                          </span>
+                        </div>
+                        <Bar
+                          percent={metricVal}
+                          color={isHost ? 'var(--action)' : metricVal >= 80 ? 'var(--pass)' : metricVal >= 65 ? 'var(--warn)' : 'var(--fail)'}
+                          height={8}
+                          delay={idx * 50}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* FULL QUANTITATIVE AUDIT LEDGER TABLE */}
       <div className="overflow-hidden rounded-card border border-hairline bg-surface">
         <div className="border-b border-hairline px-5 py-4">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle>Institutional Results Audit Ledger — Multi-Parameter Comparative Matrix</CardTitle>
               <p className="text-[11.5px] font-medium text-ink-faint mt-0.5">
-                Detailed quantitative breakdown across Batch Score, Pass/Fail Ratios, Bloom Rigour, Standard Deviation, and Appeal Rates.
+                Side-by-side quantitative performance across Pass/Fail %, Batch Mean, Median, Standard Deviation, and Appeal Rates.
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[10.5px] text-ink-faint">Select Peer for Head-to-Head:</span>
+              <span className="font-mono text-[10.5px] text-ink-faint">Head-to-Head Peer:</span>
               <select
+                aria-label="Select peer university for head-to-head comparison"
                 value={pinnedCompareUnivId}
                 onChange={(e) => setPinnedCompareUnivId(e.target.value)}
                 className="field text-[11.5px] font-medium py-1 px-2.5"
@@ -458,7 +600,7 @@ export default function DeanUniversityComparison({
                     <td className="py-3 px-3 text-right font-mono text-action-ink">{inst.distinctionRate}%</td>
                     <td className="py-3 px-3 text-right font-mono font-bold text-pass">{inst.obeTargetAttainment}%</td>
                     <td className="py-3 px-3 text-right font-mono text-ink">{inst.bloomRigourIndex}%</td>
-                    <td className="py-3 px-3 text-right font-mono text-ink-faint">{inst.challengeAppealRate}%</td>
+                    <td className="py-3 px-3 text-right font-mono text-ink-faint">{inst.appealRate || inst.challengeAppealRate}%</td>
                     <td className="py-3 px-4 text-center">
                       <span className={`inline-block rounded-pill px-2 py-0.5 font-mono text-[9.5px] font-bold ${
                         isHost
@@ -484,15 +626,15 @@ export default function DeanUniversityComparison({
           <div className="flex items-center justify-between border-b border-hairline pb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-action" />
-              <CardTitle>Dean's Head-to-Head Comparison: {hostStats.shortName} vs {pinnedPeer.shortName}</CardTitle>
+              <CardTitle>Dean's Head-to-Head Paired Audit: {hostStats.shortName} vs {pinnedPeer.shortName}</CardTitle>
             </div>
-            <StatusPill tone="neutral">Inter-University Peer Audit</StatusPill>
+            <StatusPill tone="neutral">National Peer Audit</StatusPill>
           </div>
 
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
             {/* Metric 1: Overall Pass vs Fail Performance */}
             <div className="rounded-inner border border-hairline bg-surface-sunken p-4">
-              <Label>PASS RATIO &amp; RETENTION</Label>
+              <Label>PASS / FAIL RATIOS &amp; RETENTION</Label>
               <div className="mt-3 space-y-2 text-[12px]">
                 <div className="flex items-center justify-between">
                   <span className="text-ink-muted">{hostStats.shortName}:</span>
@@ -525,8 +667,11 @@ export default function DeanUniversityComparison({
                   <span className="font-mono font-bold text-ink">{pinnedPeer.batchAveragePercentage}% (σ={pinnedPeer.standardDeviation})</span>
                 </div>
                 <div className="mt-2 border-t border-hairline pt-2 text-[11px]">
-                  <span className="text-ink-faint">Top Decile Mean: </span>
-                  <span className="font-mono text-ink">Host: {hostStats.topDecileAvg} vs Peer: {pinnedPeer.topDecileAvg}</span>
+                  <span className="text-ink-faint">Score Variance: </span>
+                  <span className="font-mono text-ink">
+                    {(hostStats.batchAveragePercentage - pinnedPeer.batchAveragePercentage) >= 0 ? '+' : ''}
+                    {(hostStats.batchAveragePercentage - pinnedPeer.batchAveragePercentage).toFixed(1)}% vs National Peer
+                  </span>
                 </div>
               </div>
             </div>
@@ -544,8 +689,8 @@ export default function DeanUniversityComparison({
                   <span className="font-mono font-bold text-ink">{hostStats.bloomRigourIndex}% vs {pinnedPeer.bloomRigourIndex}%</span>
                 </div>
                 <div className="mt-2 border-t border-hairline pt-2 text-[11px]">
-                  <span className="text-ink-faint">Derivation Accuracy: </span>
-                  <span className="font-mono text-pass">{hostStats.derivationAccuracyIndex}% Host Mastery</span>
+                  <span className="text-ink-faint">Derivation / Proof Mastery: </span>
+                  <span className="font-mono text-pass">{hostStats.derivationAccuracyIndex}% Host Index</span>
                 </div>
               </div>
             </div>

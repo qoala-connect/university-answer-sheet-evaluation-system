@@ -27,8 +27,8 @@ function SubjectSwitcher({ courses = [], activeCourseId, onChange }) {
   return (
     <div className="relative">
       <div className="flex items-center gap-2.5 rounded-field border border-hairline bg-page px-3 py-[7px]">
-        <span className="text-[13px] leading-none">{active.icon || '🏃'}</span>
-        <span className="font-mono text-[10.5px] font-medium text-ink-faint">SUBJECT</span>
+        <span className="text-[13px] leading-none">{active.icon || '🏛️'}</span>
+        <span className="font-mono text-[10.5px] font-medium text-ink-faint">COURSE</span>
         <span className="text-[13px] font-semibold text-ink max-w-[240px] truncate">{active.name}</span>
         <ChevronDown className="h-[13px] w-[13px] text-ink-faint shrink-0" strokeWidth={2.2} />
       </div>

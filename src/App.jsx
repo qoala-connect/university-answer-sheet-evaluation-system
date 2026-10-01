@@ -27,7 +27,7 @@ export default function App() {
   const [session, setSession] = useState(loadSession);
 
   const [courses, setCourses] = useState(UNIVERSITY_COURSES);
-  const [activeCourseId, setActiveCourseId] = useState('physics_motion');
+  const [activeCourseId, setActiveCourseId] = useState('me_617');
   
   // Tab states per role
   const [teacherTab, setTeacherTab] = useState('dashboard'); // 'dashboard' | 'ingest' | 'schema' | 'appeals'
@@ -43,7 +43,7 @@ export default function App() {
   const courseStudents = students.filter((s) => s.courseId === activeCourseId);
   const currentStudentsList = courseStudents.length > 0 ? courseStudents : students;
 
-  const schema = schemas[activeCourseId] || schemas['physics_motion'] || schemas['math_202'];
+  const schema = schemas[activeCourseId] || schemas['me_617'] || schemas['math_202'];
   const pendingIssuesCount = issues.filter(
     (i) => (i.courseId === activeCourseId) && (i.status === 'Under Review' || i.status === 'Pending')
   ).length;
